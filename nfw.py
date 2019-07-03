@@ -30,7 +30,7 @@ def sigma(r,rho_0,r_s):
 
 G = 4.301*10**(-9) #km^2 Mpc M_sun^-1 s^-2
 h0 = 67 #km s-1 Mpc-1
-m_tot = 1e16 # m_sun
+m_tot = 2e14 # m_sun
 c = 10.
 omg_m = 0.3
 
@@ -55,6 +55,7 @@ for i  in rbin:
 
 # interpolating the above sigma vs R.
 des_pro = interp1d(rbin,kappa,kind='cubic')
+
 del_des = np.zeros(len(rbin))
 mass_in = (2*np.pi*quad(lambda x: x, 0,np.min(rbin))[0])*des_pro(np.min(rbin))
 
@@ -69,14 +70,14 @@ for i in rbin:
 
 plt.xlabel('R (Mpc)')
 plt.ylabel(r'$\Delta\Sigma (R)$')
-plt.plot(rbin,del_des/(1e14),'r',label = 'numerical')
+plt.plot(rbin,del_des/(1e12),'r',label = 'numerical')
 #plt.plot(rbin,delta(rbin),'b', label= 'interpolated')
 #plt.plot(rbin,sig,'g',label = 'analytical')
-plt.xlim(0.01,np.max(rbin))
-plt.ylim(0.01,101)
+plt.xlim(0.1,np.max(rbin))
+#plt.ylim(0.01,101)
 plt.xscale('log')
 plt.yscale('log')
 plt.legend()
-plt.savefig("/Users/divyarana/Desktop/model.pdf",dpi=300,format='pdf')
+#plt.savefig("/Users/divyarana/Desktop/model.pdf",format='pdf')
 plt.show()
 

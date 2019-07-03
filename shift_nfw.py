@@ -57,6 +57,13 @@ for i  in rbin:
 des_pro = interp1d(rbin,kappa,kind='cubic')
 del_des = np.zeros(len(rbin))
 c=0
+mass_in = (2*np.pi*quad(lambda x: x, 0,np.min(rbin))[0])*des_pro(np.min(rbin))
+
+gc = 0
+for i in rbin:
+    del_des[gc] = (mass_in + 2*np.pi*quad(lambda x: x*des_pro(x), np.min(rbin), i)[0])/(np.pi*i**2) - des_pro(i)
+    gc=gc+1
+
 
 # DAUGHTER HALO PARAMETERS
 # position of center of the disc
@@ -69,20 +76,20 @@ del_sigma = np.zeros(len(rd_bin))
 
 # integrating over theta getting mean over a circle
 def des_cir(r,r0):
-    value = quad(lambda j: des_pro(np.sqrt(r0**2 + r**2 + 2*r0*r*np.cos(j))), -np.pi, np.pi)[0]/(2*np.pi)
+    value = quad(lambda j: des_pro(np.sqrt(r0**2 + r**2 + 2*r0*r*np.cos(j))), 0., 2*np.pi)[0]/(2*np.pi)
     return value
 
 
 c = 0
 for r in rd_bin:
-    del_sigma[c] = (2*np.pi*quad(lambda r: des_cir(r,r0), 0,r)[0])/(np.pi*r**2) - des_cir(r,r0)
+    del_sigma[c] = (2*np.pi*quad(lambda r: r*des_cir(r,r0), 0,r)[0])/(np.pi*r**2) - des_cir(r,r0)
     print 'hello %2.5f' % (r)
     c = c+1
 plt.xlabel('R (Mpc)')
 plt.ylabel(r'$\Delta\Sigma (R)$')
 plt.plot(rd_bin,del_sigma,'r',label = 'sattelite numerical')
 plt.xscale('log')
-plt.yscale('log')
+#plt.yscale('log')
 plt.legend()
 plt.show()
 
