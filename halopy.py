@@ -5,7 +5,7 @@ from scipy.interpolate import interp1d
 class constants:
     """Useful constants"""
     G = 4.301e-9 #km^2 Mpc M_sun^-1 s^-2 gravitational constant
-    H0 = 100. #kms-1 Mpc-1 hubble constant at present
+    H0 = 100. #h kms-1 Mpc-1 hubble constant at present
     omg_m = 0.315 #omega_matter
 
 class halo(constants):
