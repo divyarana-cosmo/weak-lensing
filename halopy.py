@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import quad
 from scipy.interpolate import interp1d
+
 class constants:
     """Useful constants"""
     G = 4.301e-9 #km^2 Mpc M_sun^-1 s^-2 gravitational constant
@@ -66,21 +67,61 @@ class halo(constants):
 
     def delta_sigma(self,R):
         """difference between mean sigma and average over the circle of radius R"""
-
         value =  2*np.pi*quad(lambda Rp: Rp*self.sigma(Rp), 0.0, R)[0]/(np.pi*R**2) - self.sigma(R)
-
         return value
 
+    def sigma_cic(self,r,r0):
+        """integrating over theta getting mean over a circle"""
+        value = quad(lambda j: self.sigma(np.sqrt(r0**2 + r**2 + 2*r0*r*np.cos(j))), 0., 2*np.pi)[0]/(2*np.pi)
+        return value
 
 if __name__ == "__main__":
+    """initiating the class"""
+    #contribution due to daughter nfw
+    h_d = halo(2e12,10.)
+
+    rdbin = np.logspace(-2.6,np.log10(4*h_d.r_200),50)
+    delta_sig_dau_nfw = 0.0*rdbin
+    for i  in range(0,len(rdbin)):
+        delta_sig_dau_nfw[i] = h_d.delta_sigma(rdbin[i])
+
+    #contribution due to parent halo nfw
     h_p = halo(2e14,10.)
+    """position of the center of the daughter halo"""
+    x0 = h_p.r_200/2
+    y0 = h_p.r_200/2
+    r0 = np.sqrt(x0**2 + y0**2)
+    #rbin = np.logspace(-2,np.log10(h_p.r_200),20)
+    des_cir = 0.0*rdbin
+    for i  in range(0,len(rdbin)):
+        des_cir[i] = h_p.sigma_cic(rdbin[i],r0)
 
-    rbin = np.logspace(-2,np.log10(h_p.r_200),20)
-    sig = np.zeros(len(rbin))
-    for i  in range(0,len(rbin)):
-        sig[i] = h_p.delta_sigma(rbin[i])
+    sig_cir_spl = interp1d(rdbin,des_cir,kind = "cubic")
+    def sig_cir(r):
+        if r < np.min(rdbin):
+            value =  sig_cir_spl(np.min(rdbin))
+        elif r > np.max(rdbin):
+            value = 0
+        else:
+            value = sig_cir_spl(r)
+        return value
+    dau_delta_sigma = 0.0*rdbin
+    c = 0
+    for r1 in rdbin:
+        dau_delta_sigma[c] = (2*np.pi*quad(lambda r: r*sig_cir(r), 0,r1)[0])/(np.pi*r1**2) - sig_cir(r1)
+        print 'hello %2.5f' % (r1)
+        c = c+1
 
-    plt.plot(rbin,sig)
+
+    plt.plot(rdbin,dau_delta_sigma/1e12 ,'or', label = 'parent halo contribution')
+    plt.plot(rdbin,delta_sig_dau_nfw/1e12,'ob', label  = 'daughter halo contribution')
+    plt.plot(rdbin,(delta_sig_dau_nfw + dau_delta_sigma)/1e12,'og', label  = 'addition of both')
+    #plt.axvline(r0)
+    plt.xlim(0.05,)
     plt.xscale('log')
-    plt.yscale('log')
+    plt.xlabel('R (Mpc h-1)')
+    plt.ylabel(r'$\Delta \Sigma (R) \times 10^{12}$  ')
+
+    #plt.yscale('log')
+    plt.legend()
     plt.show()
