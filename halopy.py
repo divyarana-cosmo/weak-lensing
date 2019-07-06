@@ -16,7 +16,7 @@ class halo(constants):
         self.c = con_par # concentration parameter
         self.rho_crt = 3*self.H0**2/(8*np.pi*self.G) # rho critical
         self.r_200 = (3*m_tot/(4*np.pi*200*self.rho_crt*self.omg_m))**(1./3.) # radius defines size of the halo
-        self.rho_0 = con_par**3 *m_tot/(4*np.pi*self.r_200**3 *(np.log(1+con_par)-con_par/(1+con_par)))
+        self.rho_0 = con_par**3 *m_tot/(4*np.pi*self.r_200**3 *(np.log(1.0+con_par)-con_par/(1.0+con_par)))
         self.init_sigma = False
         print "Intialing NFW parameters\n m_tot = %s M_sun\nconc_parm = %s\nrho_0 = %s M_sun/Mpc^3\n r_s = %s Mpc"%(m_tot,con_par,self.rho_0,self.r_200/self.c)
 
@@ -80,6 +80,7 @@ if __name__ == "__main__":
     #contribution due to daughter nfw
     h_d = halo(2e12,10.)
 
+
     rdbin = np.logspace(-2.6,np.log10(4*h_d.r_200),50)
     delta_sig_dau_nfw = 0.0*rdbin
     for i  in range(0,len(rdbin)):
@@ -87,6 +88,9 @@ if __name__ == "__main__":
 
     #contribution due to parent halo nfw
     h_p = halo(2e14,10.)
+    print "here"
+    print h_p.sigma(0.4)
+
     """position of the center of the daughter halo"""
     x0 = h_p.r_200/2
     y0 = h_p.r_200/2
