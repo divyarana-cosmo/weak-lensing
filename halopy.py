@@ -117,15 +117,16 @@ if __name__ == "__main__":
         c = c+1
 
 
-    plt.plot(rdbin,dau_delta_sigma/1e12 ,'or', label = 'parent halo contribution')
-    plt.plot(rdbin,delta_sig_dau_nfw/1e12,'ob', label  = 'daughter halo contribution')
-    plt.plot(rdbin,(delta_sig_dau_nfw + dau_delta_sigma)/1e12,'og', label  = 'addition of both')
+    #plt.plot(rdbin,dau_delta_sigma/1e12 ,'r', label = 'parent halo contribution')
+    #plt.plot(rdbin,delta_sig_dau_nfw/1e12,'b', label  = 'daughter halo contribution')
+    #plt.plot(rdbin,(delta_sig_dau_nfw + dau_delta_sigma)/1e12,'g', label  = 'addition of both')
     #plt.axvline(r0)
-    plt.xlim(0.05,)
+    plt.plot(rdbin,h_p.sigma(rdbin))
+    #plt.xlim(0.05,)
     plt.xscale('log')
     plt.xlabel('R (Mpc h-1)')
     plt.ylabel(r'$\Delta \Sigma (R) \times 10^{12}$  ')
 
-    #plt.yscale('log')
+    plt.yscale('log')
     plt.legend()
     plt.show()
