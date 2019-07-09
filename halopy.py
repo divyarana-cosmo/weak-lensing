@@ -16,7 +16,7 @@ class halo(constants):
         self.c = con_par # concentration parameter
         self.rho_crt = 3*self.H0**2/(8*np.pi*self.G) # rho critical
         self.r_200 = (3*m_tot/(4*np.pi*200*self.rho_crt*self.omg_m))**(1./3.) # radius defines size of the halo
-        self.rho_0 = con_par**3 *m_tot/(4*np.pi*self.r_200**3 *(np.log(1.0+con_par)-con_par/(1.0+con_par)))
+        self.rho_0 = con_par**3 *m_tot/(4*np.pi*self.r_200**3 *(np.log(1+con_par)-con_par/(1+con_par)))
         self.init_sigma = False
         print "Intialing NFW parameters\n m_tot = %s M_sun\nconc_parm = %s\nrho_0 = %s M_sun/Mpc^3\n r_s = %s Mpc"%(m_tot,con_par,self.rho_0,self.r_200/self.c)
 
@@ -88,8 +88,8 @@ if __name__ == "__main__":
 
     #contribution due to parent halo nfw
     h_p = halo(2e14,10.)
-    print "here"
-    print h_p.sigma(0.4)
+    #print "here"
+    #print h_p.sigma(0.4)
 
     """position of the center of the daughter halo"""
     x0 = h_p.r_200/2
@@ -117,16 +117,15 @@ if __name__ == "__main__":
         c = c+1
 
 
-    #plt.plot(rdbin,dau_delta_sigma/1e12 ,'r', label = 'parent halo contribution')
-    #plt.plot(rdbin,delta_sig_dau_nfw/1e12,'b', label  = 'daughter halo contribution')
-    #plt.plot(rdbin,(delta_sig_dau_nfw + dau_delta_sigma)/1e12,'g', label  = 'addition of both')
+    plt.plot(rdbin,dau_delta_sigma/1e12 ,'or', label = 'parent halo contribution')
+    plt.plot(rdbin,delta_sig_dau_nfw/1e12,'ob', label  = 'daughter halo contribution')
+    plt.plot(rdbin,(delta_sig_dau_nfw + dau_delta_sigma)/1e12,'og', label  = 'addition of both')
     #plt.axvline(r0)
-    plt.plot(rdbin,h_p.sigma(rdbin))
-    #plt.xlim(0.05,)
+    plt.xlim(0.05,)
     plt.xscale('log')
     plt.xlabel('R (Mpc h-1)')
     plt.ylabel(r'$\Delta \Sigma (R) \times 10^{12}$  ')
 
-    plt.yscale('log')
+    #plt.yscale('log')
     plt.legend()
     plt.show()
