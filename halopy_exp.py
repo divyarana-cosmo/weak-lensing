@@ -19,7 +19,7 @@ class halo(constants):
         self.rho_0 = con_par**3 *m_tot/(4*np.pi*self.r_200**3 *(np.log(1.0+con_par)-con_par/(1.0+con_par)))
         self.init_sigma = False
         self.init_sigma_cir = False
-        print("Intialing NFW parameters\n m_tot = %s M_sun\nconc_parm = %s\nrho_0 = %s M_sun/Mpc^3\n r_s = %s Mpc"%(m_tot,con_par,self.rho_0,self.r_200/self.c))
+        print "Intialing NFW parameters\n m_tot = %s M_sun\nconc_parm = %s\nrho_0 = %s M_sun/Mpc^3\n r_s = %s Mpc"%(m_tot,con_par,self.rho_0,self.r_200/self.c)
 
     def nfw(self,r):
         """given r, this gives nfw profile as per the instantiated parameters"""
@@ -52,7 +52,7 @@ class halo(constants):
 
     def init_sigma_spl(self):
 
-        print("SPLINE READY FOR NFW SIGMA")
+        print "SPLINE READY FOR NFW SIGMA"
         Rarr = np.logspace(-2,np.log10(8*self.r_200),50)
         Sigmaarr = Rarr*0.0
 
@@ -80,9 +80,10 @@ class halo(constants):
     """segment for the parent halo contribution for the daughter halo at distance r0"""
     def sigma_cir(self,r,r0):
         """sigma mean over a circle using the spline given below"""
-        if not self.init_sigma_cir:
-            self.init_sigma_cir_spl(r0)
+        #if not self.init_sigma_cir:
+        #    self.init_sigma_cir_spl(r0)
 
+        self.init_sigma_cir_spl(r0)
         if r > self.sigma_cir_dict["Rmax"]:
             value = 0.0
         elif r < self.sigma_cir_dict["Rmin"]:
@@ -96,7 +97,7 @@ class halo(constants):
     def init_sigma_cir_spl(self,r0):
         """spline for the satellite at a distance r0 from the center for parents contribution averaged over a circle"""
 
-        print("SPLINE READY FOR AVERAGING OVER CIRCLE")
+        print "SPLINE READY FOR AVERAGING OVER CIRCLE"
         rdbin = np.logspace(-2,np.log(10*self.r_200),50)
         des_cir = 0.0*rdbin
         for i  in range(0,len(rdbin)):
@@ -117,7 +118,7 @@ class halo(constants):
 
 
 if __name__ == "__main__":
-    mtot_bin = np.arange(10,11,1)
+    """mtot_bin = np.arange(10,11,1)
     mtot_bin = 10**mtot_bin
     #c_bin = np.
     rdbin = np.logspace(-1,np.log10(10),50)
@@ -132,29 +133,28 @@ if __name__ == "__main__":
 
         #print rdbin[i]
 
-
+"""
     #print h_d.delta_sigma(rdbin[0])
     #print h_p.delta_sigma_dau(rdbin[0],rd_dist)
-    hp = halo(1e14,10.0)
-    r0 = 0.1#hp.r_200/2
+    hp = halo(1e12,10.0)
+    r0 = hp.r_200/2
     rbin = np.logspace(-2,np.log10(4),10)
     dcic = rbin*0.0
     for i in range(0,len(rbin)):
         dcic[i] = hp.sigma_cir(rbin[i],r0)
 
-    #plt.plot(rbin,dcic,'or')
+    plt.plot(rbin,dcic,'or')
 
     r0 = hp.r_200/4
     dcic1 = rbin*0.0
     for i in range(0,len(rbin)):
         dcic1[i] = hp.sigma_cir(rbin[i],r0)
 
-    plt.plot(rbin,dcic1/1e12,label='sdhja')
+    plt.plot(rbin,dcic1,label='sdhja')
     #print delta_part
         #delta_part = 0.0*rdbin
 
     #plt.plot(rdbin,delta_part/1e12,'ob', label = 'parent')
-    #plt.plot(rdbin, delta_part/1e12,'og', label  = 'addition of both')
     #plt.plot(rdbin,(delta_daug + delta_part)/1e12,'og', label  = 'addition of both')
     #plt.axvline(6*h_p.r_200)
     #plt.axvline(2.0*rd_dist)
@@ -162,9 +162,9 @@ if __name__ == "__main__":
     #plt.xlim(0.1,4)
     #plt.ylim(1e0,)
     plt.xscale('log')
-    #plt.yscale('log')
+    plt.yscale('log')
     plt.xlabel('$R (Mpc h^{-1})$')
     plt.ylabel(r'$\Delta \Sigma (R) \times 10^{12} M_\odot (Mpc/h)^{-2}$ ')
     #plt.savefig("/Users/divyarana/Dropbox/grad_school_project/images/del_sigma.pdf",format='pdf')
     plt.legend()
-    plt.savefig('test.png', dpi=300)
+    plt.show()

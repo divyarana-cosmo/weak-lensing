@@ -39,7 +39,7 @@ r_200 = (3*m_tot/(4*np.pi*200*rho_crt*omg_m))**(1./3.)
 rho_0 = c**3 * m_tot / (4*np.pi*r_200**3 * (np.log(1+c) - c/(1+c)))
 r_s = r_200/c
 
-print r_200
+print(r_200)
 rbin = np.logspace(-2,np.log10(r_200),30)
 kappa = np.zeros(len(rbin))
 sig = np.zeros(len(rbin))
@@ -83,7 +83,7 @@ def des_cir(r,r0):
 c = 0
 for r in rd_bin:
     del_sigma[c] = (2*np.pi*quad(lambda r: r*des_cir(r,r0), 0,r)[0])/(np.pi*r**2) - des_cir(r,r0)
-    print 'hello %2.5f' % (r)
+    print('hello %2.5f' % (r))
     c = c+1
 plt.xlabel('R (Mpc)')
 plt.ylabel(r'$\Delta\Sigma (R)$')
@@ -91,5 +91,6 @@ plt.plot(rd_bin,del_sigma,'r',label = 'sattelite numerical')
 plt.xscale('log')
 #plt.yscale('log')
 plt.legend()
-plt.show()
+plt.savefig('offcen.png', dpi=300)
+#plt.show()
 

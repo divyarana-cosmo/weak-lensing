@@ -18,13 +18,55 @@ class halo(constants):
         self.r_200 = (3*m_tot/(4*np.pi*200*self.rho_crt*self.omg_m))**(1./3.) # radius defines size of the halo
         self.rho_0 = con_par**3 *m_tot/(4*np.pi*self.r_200**3 *(np.log(1+con_par)-con_par/(1+con_par)))
         self.init_sigma = False
-        print "Intialing NFW parameters\n m_tot = %s M_sun\nconc_parm = %s\nrho_0 = %s M_sun/Mpc^3\n r_s = %s Mpc"%(m_tot,con_par,self.rho_0,self.r_200/self.c)
+        print("Intialing NFW parameters\n m_tot = %s M_sun\nconc_parm = %s\nrho_0 = %s M_sun/Mpc^3\n r_s = %s Mpc"%(m_tot,con_par,self.rho_0,self.r_200/self.c))
 
     def nfw(self,r):
         """given r, this gives nfw profile as per the instantiated parameters"""
         r_s = self.r_200/self.c
         value  = self.rho_0/((r/r_s)*(1+r/r_s)**2)
         return value
+
+    def sigma_nfw(self,r):
+        r_s = self.r_200/self.c
+        k = 2*r_s*self.rho_0
+        sig = 0.0*r
+        c=0
+        for i in r:
+            x = i/r_s
+            if x < 1:
+                value = (1 - np.arccosh(1/x)/np.sqrt(1-x**2))/(x**2-1)
+            elif x > 1:
+                value = (1 - np.arccos(1/x)/np.sqrt(x**2-1))/(x**2-1)
+            else:
+                value = 1./3.
+            sig[c] = value*k
+            c=c+1
+
+        return sig
+
+    def avg_sigma_nfw(self,r):
+        r_s = self.r_200/self.c
+        k = 2*r_s*self.rho_0
+        sig = 0.0*r
+        c=0
+        for i in r:
+            x = i/r_s
+            if x < 1:
+                value = np.arccosh(1/x)/np.sqrt(1-x**2) + np.log(x/2.0)
+                value = value*2.0/x**2
+            elif x > 1:
+                value = np.arccos(1/x)/np.sqrt(x**2-1)  + np.log(x/2.0)
+                value = value*2.0/x**2
+            else:
+                value = 2*(1-np.log(2))
+            sig[c] = value*k
+            c=c+1
+
+        return sig
+
+    def esd(self,r):
+        val = self.avg_sigma_nfw(r) - self.sigma_nfw(r)
+        return val
 
     def sigma(self, R):
         if np.isscalar(R):
@@ -51,23 +93,53 @@ class halo(constants):
 
     def init_sigma_spl(self):
 
-        Rarr = np.logspace(-2,np.log10(5*self.r_200),30)
+        Rarr = np.logspace(-2,np.log10(8*self.r_200),30)
         Sigmaarr = Rarr*0.0
 
         for ii, R in enumerate(Rarr):
-            z0 = -np.sqrt((8.*self.r_200)**2 - R**2)
-            Sigmaarr[ii] = quad((lambda z : self.nfw(np.sqrt(R**2 + z**2))),z0,-z0)[0]
+            #z0 = np.sqrt((8.*self.r_200)**2 - R**2)
+            #if z0==0:
+            #    Sigmaarr[ii]=1e-12
+            #else:
+            #    Sigmaarr[ii] = quad((lambda z : self.nfw(np.sqrt(R**2 + z**2))),-z0,z0)[0]
+            Sigmaarr[ii] = 2*quad((lambda z : self.nfw(np.sqrt(R**2 + z**2))), 0, np.inf)[0]
         self.sigma_spl = interp1d(np.log10(Rarr), np.log10(Sigmaarr))
         self.sigma_dict = {}
         self.sigma_dict["Rmin"] = Rarr[0]
         self.sigma_dict["Rmax"] = Rarr[-1]
         self.sigma_dict["Sigmamin"] = Sigmaarr[0]
+        print(Rarr[0])
         self.init_sigma = True
         return
 
+    def num_sigma(self,Rarr):
+        if np.isscalar(Rarr):
+            return 2*quad((lambda z : self.nfw(np.sqrt(Rarr**2 + z**2))), 0, np.inf)[0]
+
+        Sigmaarr = Rarr*0.0
+        for ii, R in enumerate(Rarr):
+            Sigmaarr[ii] = 2*quad((lambda z : self.nfw(np.sqrt(R**2 + z**2))), 0, np.inf)[0]
+        return Sigmaarr
+    def num_delta_sigma(self,R):
+        """difference between mean sigma and average over the circle of radius R"""
+        if np.isscalar(R):
+            value =  2*np.pi*quad(lambda Rp: Rp*self.num_sigma(Rp), 0.0, R)[0]/(np.pi*R**2) - self.num_sigma(R)
+        else:
+            value = 0.0*R
+            for ii,rr in enumerate(R):
+                value[ii] = 2*np.pi*quad(lambda Rp: Rp*self.num_sigma(Rp), 0.0, rr)[0]/(np.pi*rr**2) - self.num_sigma(rr)
+        return value
+
+
+
     def delta_sigma(self,R):
         """difference between mean sigma and average over the circle of radius R"""
-        value =  2*np.pi*quad(lambda Rp: Rp*self.sigma(Rp), 0.0, R)[0]/(np.pi*R**2) - self.sigma(R)
+        if np.isscalar(R):
+            value =  2*np.pi*quad(lambda Rp: Rp*self.sigma(Rp), 0.0, R)[0]/(np.pi*R**2) - self.sigma(R)
+        else:
+            value = 0.0*R
+            for ii,rr in enumerate(R):
+                value[ii] = 2*np.pi*quad(lambda Rp: Rp*self.sigma(Rp), 0.0, rr)[0]/(np.pi*rr**2) - self.sigma(rr)
         return value
 
     def sigma_cic(self,r,r0):
@@ -76,56 +148,22 @@ class halo(constants):
         return value
 
 if __name__ == "__main__":
-    """initiating the class"""
-    #contribution due to daughter nfw
-    h_d = halo(2e12,10.)
+    plt.subplot(2,2,1)
+    rbin = np.logspace(-2,np.log10(2),30)
 
+    hp = halo(1e13,10)
+    plt.plot(rbin, hp.nfw(rbin), '-', label='c=10')
 
-    rdbin = np.logspace(-2.6,np.log10(4*h_d.r_200),50)
-    delta_sig_dau_nfw = 0.0*rdbin
-    for i  in range(0,len(rdbin)):
-        delta_sig_dau_nfw[i] = h_d.delta_sigma(rdbin[i])
+    hp = halo(1e13,20)
+    plt.plot(rbin, hp.nfw(rbin), '-', label='c=20')
+ 
 
-    #contribution due to parent halo nfw
-    h_p = halo(2e14,10.)
-    #print "here"
-    #print h_p.sigma(0.4)
-
-    """position of the center of the daughter halo"""
-    x0 = h_p.r_200/2
-    y0 = h_p.r_200/2
-    r0 = np.sqrt(x0**2 + y0**2)
-    #rbin = np.logspace(-2,np.log10(h_p.r_200),20)
-    des_cir = 0.0*rdbin
-    for i  in range(0,len(rdbin)):
-        des_cir[i] = h_p.sigma_cic(rdbin[i],r0)
-
-    sig_cir_spl = interp1d(rdbin,des_cir,kind = "cubic")
-    def sig_cir(r):
-        if r < np.min(rdbin):
-            value =  sig_cir_spl(np.min(rdbin))
-        elif r > np.max(rdbin):
-            value = 0
-        else:
-            value = sig_cir_spl(r)
-        return value
-    dau_delta_sigma = 0.0*rdbin
-    c = 0
-    for r1 in rdbin:
-        dau_delta_sigma[c] = (2*np.pi*quad(lambda r: r*sig_cir(r), 0,r1)[0])/(np.pi*r1**2) - sig_cir(r1)
-        print 'hello %2.5f' % (r1)
-        c = c+1
-
-
-    plt.plot(rdbin,dau_delta_sigma/1e12 ,'or', label = 'parent halo contribution')
-    plt.plot(rdbin,delta_sig_dau_nfw/1e12,'ob', label  = 'daughter halo contribution')
-    plt.plot(rdbin,(delta_sig_dau_nfw + dau_delta_sigma)/1e12,'og', label  = 'addition of both')
-    #plt.axvline(r0)
-    plt.xlim(0.05,)
+    #plt.plot(rbin, hp.num_delta_sigma(rbin)/(1e12), '.', lw=0.0)
+    #plt.plot(rbin, hp.esd(rbin)/(1e12))
     plt.xscale('log')
-    plt.xlabel('R (Mpc h-1)')
-    plt.ylabel(r'$\Delta \Sigma (R) \times 10^{12}$  ')
-
-    #plt.yscale('log')
+    plt.yscale('log')
     plt.legend()
-    plt.show()
+    plt.xlabel(r'$r$')
+    plt.ylabel(r'$\rho (r)$')
+    #plt.ylabel(r'$\Delta \Sigma (R) [{\rm h M_\odot pc^{-2}}]$')
+    plt.savefig('test.png', dpi=300)

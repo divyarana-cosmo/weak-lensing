@@ -29,10 +29,10 @@ def sigma(r,rho_0,r_s):
 #h hubble constant
 
 G = 4.301*10**(-9) #km^2 Mpc M_sun^-1 s^-2
-h0 = 67 #km s-1 Mpc-1
+h0 = 100 # h km s-1 Mpc-1
 m_tot = 2e14 # m_sun
 c = 10.
-omg_m = 0.3
+omg_m = 0.315
 
 rho_crt=3*h0**2/(8*np.pi*G)
 r_200 = (3*m_tot/(4*np.pi*200*rho_crt*omg_m))**(1./3.)
@@ -40,14 +40,14 @@ rho_0 = c**3 * m_tot / (4*np.pi*r_200**3 * (np.log(1+c) - c/(1+c)))
 r_s = r_200/c
 
 print r_200
-rbin = np.logspace(-2,np.log10(r_200),100)
+rbin = np.logspace(-2,np.log10(8*r_200),100)
 kappa = np.zeros(len(rbin))
 sig = np.zeros(len(rbin))
 
 # Here I am integrated over z, r^2 = R^2 + z^2
 c=0
 for i  in rbin:
-    ro = -np.sqrt((r_200)**2 - i**2)
+    ro = -np.sqrt((8*r_200)**2 - i**2)
     a = quad((lambda z : rho(i,z,rho_0,r_s)),ro,-ro)[0]
     kappa[c] = a
     sig[c] = sigma(i,rho_0,r_s)
@@ -68,15 +68,16 @@ for i in rbin:
 
 
 
-plt.xlabel('R (Mpc)')
-plt.ylabel(r'$\Delta\Sigma (R)$')
-plt.plot(rbin,del_des/(1e12),'r',label = 'numerical')
+plt.xlabel('R (Mpc/h)')
+plt.ylabel(r'$\Sigma (R) \times 10^{12}\,\, M_{\odot}(Mpc/h)^{-2}$')
+#plt.plot(rbin,kappa/(1e12),'or',label = 'numerical')
 #plt.plot(rbin,delta(rbin),'b', label= 'interpolated')
-#plt.plot(rbin,sig,'g',label = 'analytical')
-plt.xlim(0.1,np.max(rbin))
-#plt.ylim(0.01,101)
+#plt.plot(rbin,sig/(1e12),'-g',label = 'analytical')
+plt.xlim(0.02,2)
+#plt.ylim(0.075,0.085)
 plt.xscale('log')
-plt.yscale('log')
+#plt.yscale('log')
+plt.plot(rbin,(sig - kappa)/(1e12) ,label = 'fit_error')
 plt.legend()
-#plt.savefig("/Users/divyarana/Desktop/model.pdf",format='pdf')
+#plt.savefig("/Users/divyarana/Dropbox/nfw_proj.pdf",format='pdf')
 plt.show()
