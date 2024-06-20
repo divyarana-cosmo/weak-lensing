@@ -83,7 +83,7 @@ def des_cir(r,r0):
 c = 0
 for r in rd_bin:
     del_sigma[c] = (2*np.pi*quad(lambda r: r*des_cir(r,r0), 0,r)[0])/(np.pi*r**2) - des_cir(r,r0)
-    print('hello %2.5f' % (r))
+    print(('hello %2.5f' % (r)))
     c = c+1
 plt.xlabel('R (Mpc)')
 plt.ylabel(r'$\Delta\Sigma (R)$')

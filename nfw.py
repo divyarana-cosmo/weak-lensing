@@ -39,7 +39,7 @@ r_200 = (3*m_tot/(4*np.pi*200*rho_crt*omg_m))**(1./3.)
 rho_0 = c**3 * m_tot / (4*np.pi*r_200**3 * (np.log(1+c) - c/(1+c)))
 r_s = r_200/c
 
-print r_200
+print(r_200)
 rbin = np.logspace(-2,np.log10(8*r_200),100)
 kappa = np.zeros(len(rbin))
 sig = np.zeros(len(rbin))
@@ -59,7 +59,7 @@ des_pro = interp1d(rbin,kappa,kind='cubic')
 del_des = np.zeros(len(rbin))
 mass_in = (2*np.pi*quad(lambda x: x, 0,np.min(rbin))[0])*des_pro(np.min(rbin))
 
-print mass_in
+print(mass_in)
 c=0
 for i in rbin:
     del_des[c] = (mass_in + 2*np.pi*quad(lambda x: x*des_pro(x), np.min(rbin), i)[0])/(np.pi*i**2) - des_pro(i)

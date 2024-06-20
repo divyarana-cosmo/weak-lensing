@@ -19,7 +19,7 @@ class halo(constants):
         self.rho_0 = con_par**3 *m_tot/(4*np.pi*self.r_200**3 *(np.log(1.0+con_par)-con_par/(1.0+con_par)))
         self.init_sigma = False
         self.init_sigma_cir = False
-        print "Intialing NFW parameters\n m_tot = %s M_sun\nconc_parm = %s\nrho_0 = %s M_sun/Mpc^3\n r_s = %s Mpc"%(m_tot,con_par,self.rho_0,self.r_200/self.c)
+        print("Intialing NFW parameters\n m_tot = %s M_sun\nconc_parm = %s\nrho_0 = %s M_sun/Mpc^3\n r_s = %s Mpc"%(m_tot,con_par,self.rho_0,self.r_200/self.c))
 
     def nfw(self,r):
         """given r, this gives nfw profile as per the instantiated parameters"""
@@ -52,7 +52,7 @@ class halo(constants):
 
     def init_sigma_spl(self):
 
-        print "SPLINE READY FOR NFW SIGMA"
+        print("SPLINE READY FOR NFW SIGMA")
         Rarr = np.logspace(-2,np.log10(8*self.r_200),50)
         Sigmaarr = Rarr*0.0
 
@@ -97,7 +97,7 @@ class halo(constants):
     def init_sigma_cir_spl(self,r0):
         """spline for the satellite at a distance r0 from the center for parents contribution averaged over a circle"""
 
-        print "SPLINE READY FOR AVERAGING OVER CIRCLE"
+        print("SPLINE READY FOR AVERAGING OVER CIRCLE")
         rdbin = np.logspace(-2,np.log(10*self.r_200),50)
         des_cir = 0.0*rdbin
         for i  in range(0,len(rdbin)):
